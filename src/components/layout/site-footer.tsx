@@ -1,6 +1,9 @@
 import { Github, Mail, Radio, Youtube } from "lucide-react";
 
-import { socialLinks } from "@/data/catalog";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
+import { catalogQuery } from "@/data/catalog";
 
 /** Twitch has no lucide glyph in this version, so it gets a small inline mark. */
 function TwitchMark({ className }: { className?: string }) {
@@ -19,6 +22,11 @@ const icons = {
 } as const;
 
 export function SiteFooter() {
+  const { data: raw } = useQuery(catalogQuery());
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const data = mounted ? raw : undefined;
+  const socialLinks = data?.socialLinks ?? [];
   return (
     <footer className="border-t border-line bg-ink">
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
@@ -67,7 +75,7 @@ export function SiteFooter() {
           <span>© {new Date().getFullYear()} angelito_study — hecho entre ayudantías y cafés.</span>
           <span className="inline-flex items-center gap-2">
             <Radio className="size-3 text-gold" aria-hidden />
-            próximo subido: viernes 21:00
+            próximo subido: {data?.scheduleLabel ?? ""}
           </span>
         </div>
       </div>

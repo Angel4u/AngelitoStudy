@@ -11,10 +11,14 @@
 
 ## Rules
 
-- All page content (ramos, PDFs, featured video, social links) lives in
-  `src/data/catalog.ts` behind typed interfaces. Why: it is the single seam to
-  swap for a CMS or database later — components must never hardcode content, so
-  replacing the literal arrays with a fetch is the only change a CMS needs.
+- Page content (malla ramos, units with video/pdf links, schedule, social links) lives in
+  Lovable Cloud tables and is read through `catalogQuery()` / `subjectQuery(id)` in
+  `src/data/catalog.ts` (public server fn `getCatalog`). Why: one typed read
+  path for every page; components never hardcode content.
+- Edits happen in `/admin` (under `_authenticated`) with the browser client;
+  RLS allows writes only for `has_role(auth.uid(),'admin')`, and the first
+  account created claims admin via trigger. Why: security lives in the
+  database, not the UI.
 - Styles come only from the semantic tokens in `src/styles.css` (`bg-panel`,
   `text-halo`, `border-line`, `shadow-halo`). Why: the dark lo-fi theme stays
   consistent and a future light theme or brand change touches one file.

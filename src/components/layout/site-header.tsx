@@ -1,16 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { Radio } from "lucide-react";
 
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
+import { catalogQuery } from "@/data/catalog";
 import avatar from "@/assets/avatar-angelito.png";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "#ultima-clase", label: "última_clase" },
-  { href: "#ramos", label: "ramos" },
-  { href: "#apuntes", label: "apuntes" },
-] as const;
+const navItems = [{ href: "#malla", label: "malla" }] as const;
 
 export function SiteHeader({ className }: { className?: string }) {
+  const { data } = useQuery(catalogQuery());
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   return (
     <header
       className={cn(
@@ -20,7 +23,7 @@ export function SiteHeader({ className }: { className?: string }) {
     >
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <a
-          href="#top"
+          href="/#top"
           className="flex min-w-0 items-center gap-3"
           aria-label="AngelitoStudy, ir al inicio"
         >
@@ -46,7 +49,7 @@ export function SiteHeader({ className }: { className?: string }) {
           {navItems.map((item) => (
             <a
               key={item.href}
-              href={item.href}
+              href={`/${item.href}`}
               className="rounded-md px-3 py-2 font-mono text-xs text-muted-foreground transition-colors hover:bg-panel hover:text-halo"
             >
               ./{item.label}
@@ -57,7 +60,7 @@ export function SiteHeader({ className }: { className?: string }) {
         <div className="flex shrink-0 items-center gap-2">
           <span className="label-mono hidden items-center gap-2 rounded-md border border-line px-2.5 py-1.5 text-muted-foreground lg:inline-flex">
             <Radio className="size-3 text-gold" aria-hidden />
-            sube viernes 21:00
+            sube {mounted ? (data?.scheduleLabel ?? "") : ""}
           </span>
           <Link
             to="/"
