@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { ScrollVideo } from "@/components/sections/scroll-video";
 
 function NotFoundComponent() {
   return (
@@ -92,7 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Videos de resolución de ejercicios y apuntes universitarios para estudiantes de Ingeniería Civil Informática.",
       },
       { name: "author", content: "AngelitoStudy" },
-      { name: "theme-color", content: "#0b0e11" },
+      { name: "theme-color", content: "#0a0a0a" },
       { property: "og:title", content: "AngelitoStudy" },
       {
         property: "og:description",
@@ -117,6 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap",
       },
+      { rel: "icon", type: "image/svg+xml", href: "/assets/solace-mark.svg" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
     ],
   }),
@@ -146,9 +148,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <SiteHeader />
-      <Outlet />
-      <SiteFooter />
+      <div className="relative min-h-dvh">
+        <ScrollVideo />
+        <SiteHeader />
+        <Outlet />
+        <SiteFooter />
+      </div>
     </QueryClientProvider>
   );
 }

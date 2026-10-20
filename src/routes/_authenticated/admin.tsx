@@ -118,7 +118,7 @@ function AdminPage() {
   const d = admin.data;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+    <main className="mx-auto w-full max-w-5xl px-5 pb-16 pt-28 sm:px-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <span className="label-mono text-gold">// panel admin</span>
@@ -172,6 +172,12 @@ type UnitWithRes = UnitRow & { unit_resources: ResourceRow[] };
 function UnitsEditor({ subjects, done }: { subjects: SubjectRow[]; done: Done }) {
   const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? "");
   const [newTitle, setNewTitle] = useState("");
+
+  useEffect(() => {
+    if (subjects.length > 0 && !subjects.some((s) => s.id === subjectId)) {
+      setSubjectId(subjects[0]!.id);
+    }
+  }, [subjects, subjectId]);
 
   const units = useQuery({
     queryKey: ["admin-units", subjectId],
@@ -289,6 +295,9 @@ function ResourceRowForm({ row, done }: { row: ResourceRow; done: Done }) {
   const [label, setLabel] = useState(row.label);
   const [url, setUrl] = useState(row.url);
   async function save() {
+    if (!label.trim() || !/^https?:\/\//.test(url.trim())) {
+      return done({ message: "Pon un nombre y un link válido con https://" }, "");
+    }
     const { error } = await supabase.from("unit_resources").update({ label: label.trim(), url: url.trim() }).eq("id", row.id);
     await done(error, "Guardado");
   }
@@ -341,8 +350,20 @@ function SubjectForm({ row, isNew, done }: { row: SubjectRow; isNew?: boolean; d
       accent: f.accent,
       sort_order: Number(f.sort_order) || 0,
     };
+    const slugId = f.code
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 64);
+    if (isNew && !slugId) {
+      setBusy(false);
+      return done({ message: "El código debe contener letras o números válidos" }, "");
+    }
     const { error } = isNew
-      ? await supabase.from("subjects").insert({ ...payload, id: f.code.trim() })
+      ? await supabase.from("subjects").insert({ ...payload, id: slugId })
       : await supabase.from("subjects").update(payload).eq("id", row.id);
     setBusy(false);
     await done(error, isNew ? "Ramo agregado" : "Ramo guardado");
@@ -396,9 +417,19 @@ function ScheduleForm({ value, done }: { value: string; done: Done }) {
 function SocialForm({ row, done }: { row: SocialRow; done: Done }) {
   const [f, setF] = useState(row);
   async function save() {
+    const cleanHref = f.href.trim();
+    const validHref =
+      cleanHref === "" ||
+      (row.id === "email" ? /^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(cleanHref) : /^https?:\/\//i.test(cleanHref));
+    if (!validHref) {
+      return done(
+        { message: row.id === "email" ? "Usa un correo válido con mailto:..." : "El link debe empezar con https://" },
+        "",
+      );
+    }
     const { error } = await supabase
       .from("social_links")
-      .update({ label: f.label, handle: f.handle, href: f.href })
+      .update({ label: f.label.trim(), handle: f.handle.trim(), href: cleanHref })
       .eq("id", row.id);
     await done(error, `${f.label} guardado`);
   }

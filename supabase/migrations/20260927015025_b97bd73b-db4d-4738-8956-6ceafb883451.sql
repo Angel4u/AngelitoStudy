@@ -7,6 +7,9 @@ create table public.user_roles (
   role public.app_role not null,
   unique (user_id, role)
 );
+create unique index user_roles_single_admin_idx
+  on public.user_roles (role)
+  where role = 'admin';
 grant select on public.user_roles to authenticated;
 grant all on public.user_roles to service_role;
 alter table public.user_roles enable row level security;
@@ -22,14 +25,14 @@ returns boolean language sql stable security definer set search_path = public
 as $$ select exists (select 1 from public.user_roles where role = 'admin') $$;
 grant execute on function public.admin_exists() to anon, authenticated;
 
--- First account ever created becomes the only admin
+-- First account ever created becomes the only admin (atomic via partial unique index)
 create or replace function public.claim_first_admin()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
-  if not exists (select 1 from public.user_roles where role = 'admin') then
-    insert into public.user_roles (user_id, role) values (new.id, 'admin');
-  end if;
+  insert into public.user_roles (user_id, role)
+  values (new.id, 'admin')
+  on conflict (role) where (role = 'admin') do nothing;
   return new;
 end $$;
 create trigger on_auth_user_created_claim_admin

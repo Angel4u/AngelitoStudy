@@ -1,7 +1,14 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
+import { validateServerFunctionRequest } from "./lib/payload-guard";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
+
+const payloadGuardMiddleware = createMiddleware().server(async ({ request, next }) => {
+  const rejected = await validateServerFunctionRequest(request);
+  if (rejected) return rejected;
+  return await next();
+});
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -27,5 +34,5 @@ const csrfMiddleware = createCsrfMiddleware({
 
 export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
-  requestMiddleware: [errorMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, csrfMiddleware, payloadGuardMiddleware],
 }));

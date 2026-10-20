@@ -45,7 +45,7 @@ function RamoPage() {
   if (!s) return null;
 
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-4xl px-4 py-10 sm:px-6">
+    <main className="mx-auto min-h-dvh w-full max-w-4xl px-5 pb-16 pt-28 sm:px-8">
       <Link to="/" hash="malla" className="label-mono inline-flex items-center gap-1.5 text-muted-foreground hover:text-halo">
         <ArrowLeft className="size-3.5" /> malla
       </Link>
