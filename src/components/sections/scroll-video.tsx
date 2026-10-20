@@ -1,39 +1,160 @@
 import { useEffect, useRef, useState } from "react";
 
-const VIDEO_SRC = "/assets/solace-ambient-loop.mp4";
 const POSTER_SRC = "/assets/solace-ambient-poster.webp";
 
 function clamp(val: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, val));
 }
 
-function drawCover(
+function drawBreathingVessel(
   ctx: CanvasRenderingContext2D,
-  source: CanvasImageSource,
-  fw: number,
-  fh: number,
-  cw: number,
-  ch: number,
+  w: number,
+  h: number,
+  progress: number,
 ) {
-  if (fw <= 0 || fh <= 0 || cw <= 0 || ch <= 0) return;
-  const scale = Math.max(cw / fw, ch / fh);
-  const dw = fw * scale;
-  const dh = fh * scale;
-  const dx = (cw - dw) * 0.5;
-  const dy = (ch - dh) * 0.5;
-  ctx.clearRect(0, 0, cw, ch);
-  ctx.drawImage(source, dx, dy, dw, dh);
+  ctx.fillStyle = "#0a0a0a";
+  ctx.fillRect(0, 0, w, h);
+
+  const cx = w * 0.5;
+  const cy = h * 0.5;
+  const minDim = Math.min(w, h);
+  const baseR = minDim * 0.34;
+
+  const phase = progress * Math.PI * 2;
+  const breath = Math.sin(phase);
+  const breathCos = Math.cos(phase);
+  const expansion = 1 + 0.14 * Math.sin(progress * Math.PI);
+
+  // 1. Ambient volumetric haze & upper-left cool key light
+  const hazeGrad = ctx.createRadialGradient(
+    cx - baseR * 0.35,
+    cy - baseR * 0.32,
+    baseR * 0.05,
+    cx,
+    cy,
+    baseR * 1.65,
+  );
+  hazeGrad.addColorStop(0, "rgba(88, 196, 246, 0.26)");
+  hazeGrad.addColorStop(0.38, "rgba(56, 118, 224, 0.18)");
+  hazeGrad.addColorStop(0.72, "rgba(24, 44, 108, 0.08)");
+  hazeGrad.addColorStop(1, "rgba(10, 10, 10, 0)");
+  ctx.fillStyle = hazeGrad;
+  ctx.fillRect(0, 0, w, h);
+
+  // 2. Luminous core bloom
+  const coreR = baseR * (0.64 + 0.1 * breath) * expansion;
+  const coreGrad = ctx.createRadialGradient(
+    cx,
+    cy,
+    coreR * 0.06,
+    cx,
+    cy,
+    coreR * 1.4,
+  );
+  coreGrad.addColorStop(0, "rgba(155, 228, 255, 0.42)");
+  coreGrad.addColorStop(0.32, "rgba(78, 152, 245, 0.30)");
+  coreGrad.addColorStop(0.68, "rgba(32, 62, 145, 0.12)");
+  coreGrad.addColorStop(1, "rgba(10, 10, 10, 0)");
+  ctx.fillStyle = coreGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR * 1.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 3. Sparse thread-like filaments expanding and contracting with scroll
+  const filamentCount = 48;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.lineWidth = Math.max(1, minDim * 0.0011);
+  for (let i = 0; i < filamentCount; i++) {
+    const angle = (i / filamentCount) * Math.PI * 2 + progress * 0.85;
+    const wave = Math.sin(phase + i * 0.55);
+    const rInner = baseR * (0.2 + 0.04 * wave) * expansion;
+    const rOuter =
+      baseR * (0.92 + 0.11 * Math.sin(phase - i * 0.35)) * expansion;
+    const ctrlAngle = angle + 0.14 * breathCos;
+    const rMid = (rInner + rOuter) * 0.54;
+
+    const x0 = Math.cos(angle) * rInner;
+    const y0 = Math.sin(angle) * rInner;
+    const xc = Math.cos(ctrlAngle) * rMid;
+    const yc = Math.sin(ctrlAngle) * rMid;
+    const x1 = Math.cos(angle) * rOuter;
+    const y1 = Math.sin(angle) * rOuter;
+
+    const alpha = 0.14 + 0.14 * ((i % 4) / 3);
+    ctx.strokeStyle = `rgba(185, 232, 255, ${alpha.toFixed(3)})`;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.quadraticCurveTo(xc, yc, x1, y1);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // 4. Concentric frosted glass aperture rings
+  const ringCount = 10;
+  for (let i = 0; i < ringCount; i++) {
+    const t = i / (ringCount - 1);
+    const localPhase = phase - t * 1.8;
+    const ringScale = (1 + 0.075 * Math.sin(localPhase)) * expansion;
+    const r = baseR * (0.22 + t * 0.82) * ringScale;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(t * 0.5 + progress * (i % 2 === 0 ? 0.65 : -0.45));
+
+    const bodyAlpha = 0.16 + (1 - t) * 0.24;
+    ctx.strokeStyle = `rgba(125, 210, 255, ${bodyAlpha.toFixed(3)})`;
+    ctx.lineWidth = Math.max(1.5, (3.2 - t * 1.8) * (minDim / 900));
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    const rimAlpha = 0.28 + Math.sin(t * Math.PI) * 0.42;
+    ctx.strokeStyle = `rgba(245, 252, 255, ${rimAlpha.toFixed(3)})`;
+    ctx.lineWidth = Math.max(1, 1.35 * (minDim / 900));
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.995, -Math.PI * 0.92, Math.PI * 0.32);
+    ctx.stroke();
+
+    if (i % 3 === 1) {
+      ctx.strokeStyle = "rgba(245, 218, 145, 0.22)";
+      ctx.lineWidth = Math.max(0.9, minDim / 1000);
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.004, Math.PI * 0.2, Math.PI * 0.85);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  // 5. Inner tactile aperture shadow & glowing pupil ring
+  const innerHoleR = baseR * (0.21 + 0.03 * breath) * expansion;
+  const innerShadow = ctx.createRadialGradient(
+    cx,
+    cy,
+    0,
+    cx,
+    cy,
+    innerHoleR * 1.15,
+  );
+  innerShadow.addColorStop(0, "rgba(10, 10, 10, 0.92)");
+  innerShadow.addColorStop(0.68, "rgba(14, 24, 48, 0.55)");
+  innerShadow.addColorStop(1, "rgba(95, 195, 255, 0)");
+  ctx.fillStyle = innerShadow;
+  ctx.beginPath();
+  ctx.arc(cx, cy, innerHoleR * 1.15, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(220, 245, 255, 0.65)";
+  ctx.lineWidth = Math.max(1.2, 1.8 * (minDim / 900));
+  ctx.beginPath();
+  ctx.arc(cx, cy, innerHoleR, 0, Math.PI * 2);
+  ctx.stroke();
 }
 
 export function ScrollVideo() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const fallbackVideoRef = useRef<HTMLVideoElement | null>(null);
-  const framesRef = useRef<ImageBitmap[]>([]);
-  const posterBitmapRef = useRef<ImageBitmap | null>(null);
-  const lastDrawnIndexRef = useRef<number>(-1);
-
-  const [framesReady, setFramesReady] = useState(false);
-  const [assetFailed, setAssetFailed] = useState(false);
+  const lastProgressRef = useRef<number>(-1);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -44,262 +165,70 @@ export function ScrollVideo() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // Load poster bitmap for reduced-motion / fallback mid-frame
-  useEffect(() => {
-    let cancelled = false;
-    const img = new Image();
-    img.decoding = "async";
-    img.src = POSTER_SRC;
-    img.onload = async () => {
-      if (cancelled) return;
-      try {
-        const bmp = await createImageBitmap(img);
-        if (cancelled) {
-          bmp.close();
-          return;
-        }
-        posterBitmapRef.current = bmp;
-        const canvas = canvasRef.current;
-        if (canvas && (reducedMotion || assetFailed || framesRef.current.length === 0)) {
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            drawCover(ctx, bmp, bmp.width, bmp.height, canvas.width, canvas.height);
-          }
-        }
-      } catch {
-        // Fallback image tag still renders when assetFailed or reducedMotion is active
-      }
-    };
-    return () => {
-      cancelled = true;
-      if (posterBitmapRef.current) {
-        posterBitmapRef.current.close();
-        posterBitmapRef.current = null;
-      }
-    };
-  }, [reducedMotion, assetFailed]);
-
-  // Pre-extract video frames into ImageBitmap[]
-  useEffect(() => {
-    if (reducedMotion) return;
-
-    let cancelled = false;
-    let objectUrl: string | null = null;
-    const extracted: ImageBitmap[] = [];
-
-    const closeBitmaps = (list: ImageBitmap[]) => {
-      for (const bmp of list) {
-        try {
-          bmp.close();
-        } catch {
-          // ignore
-        }
-      }
-      list.length = 0;
-    };
-
-    async function extractFrames() {
-      try {
-        const response = await fetch(VIDEO_SRC);
-        if (!response.ok) throw new Error("Video fetch failed");
-        const blob = await response.blob();
-        if (cancelled) return;
-
-        objectUrl = URL.createObjectURL(blob);
-        const video = document.createElement("video");
-        video.muted = true;
-        video.playsInline = true;
-        video.preload = "auto";
-        video.src = objectUrl;
-
-        await new Promise<void>((resolve, reject) => {
-          const onLoaded = () => {
-            cleanup();
-            resolve();
-          };
-          const onError = () => {
-            cleanup();
-            reject(new Error("Video metadata error"));
-          };
-          const cleanup = () => {
-            video.removeEventListener("loadedmetadata", onLoaded);
-            video.removeEventListener("error", onError);
-          };
-          video.addEventListener("loadedmetadata", onLoaded, { once: true });
-          video.addEventListener("error", onError, { once: true });
-        });
-
-        if (cancelled) return;
-
-        const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 2.5;
-        const vw = video.videoWidth || 1920;
-        const vh = video.videoHeight || 1080;
-        const scale = Math.min(1, 1280 / vw);
-        const targetW = Math.max(1, Math.round(vw * scale));
-        const targetH = Math.max(1, Math.round(vh * scale));
-        const frameCount = clamp(Math.round(duration * 24), 30, 120);
-        const usableDuration = Math.max(0.05, duration - 0.05);
-
-        const scratch = document.createElement("canvas");
-        scratch.width = targetW;
-        scratch.height = targetH;
-        const sctx = scratch.getContext("2d");
-
-        for (let i = 0; i < frameCount; i++) {
-          if (cancelled) {
-            closeBitmaps(extracted);
-            return;
-          }
-          const t = frameCount > 1 ? (i / (frameCount - 1)) * usableDuration : 0;
-
-          await new Promise<void>((resolve) => {
-            const onSeeked = () => {
-              video.removeEventListener("seeked", onSeeked);
-              resolve();
-            };
-            video.addEventListener("seeked", onSeeked, { once: true });
-            video.currentTime = t;
-          });
-
-          if (cancelled) {
-            closeBitmaps(extracted);
-            return;
-          }
-
-          let bmp: ImageBitmap;
-          if (sctx) {
-            sctx.drawImage(video, 0, 0, targetW, targetH);
-            bmp = await createImageBitmap(scratch);
-          } else {
-            bmp = await createImageBitmap(video);
-          }
-          extracted.push(bmp);
-        }
-
-        if (cancelled) {
-          closeBitmaps(extracted);
-          return;
-        }
-
-        framesRef.current = extracted;
-        lastDrawnIndexRef.current = -1;
-        setFramesReady(true);
-      } catch {
-        if (!cancelled) {
-          closeBitmaps(extracted);
-          setAssetFailed(true);
-        }
-      }
-    }
-
-    extractFrames();
-
-    return () => {
-      cancelled = true;
-      closeBitmaps(framesRef.current);
-      setFramesReady(false);
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [reducedMotion]);
-
-  // Resize canvas with DPR capped at 2 & drive RAF scroll loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
+    // Cache scrollable height so scroll events never force synchronous layout reads
+    let maxScroll = Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+
     const getScrollProgress = () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll <= 0) return 0;
       return clamp(window.scrollY / maxScroll, 0, 1);
     };
 
     let targetProgress = getScrollProgress();
-    let smoothedProgress = targetProgress;
+    let smoothedProgress = reducedMotion ? 0.35 : targetProgress;
     let rafId = 0;
-    let isFallbackSeeking = false;
-    let pendingFallbackTime: number | null = null;
 
-    const fallbackVideo = fallbackVideoRef.current;
-    const onFallbackSeeked = () => {
-      isFallbackSeeking = false;
-      if (
-        pendingFallbackTime !== null &&
-        fallbackVideo &&
-        Math.abs(fallbackVideo.currentTime - pendingFallbackTime) > 0.001
-      ) {
-        const nextTime = pendingFallbackTime;
-        pendingFallbackTime = null;
-        isFallbackSeeking = true;
-        try {
-          fallbackVideo.currentTime = nextTime;
-        } catch {
-          isFallbackSeeking = false;
-        }
-      }
-    };
-
-    if (fallbackVideo) {
-      fallbackVideo.addEventListener("seeked", onFallbackSeeked);
-    }
-
-    const drawCurrent = (force: boolean) => {
+    const renderFrame = (force: boolean) => {
       const cw = canvas.width;
       const ch = canvas.height;
+      if (cw <= 0 || ch <= 0) return;
 
-      if (reducedMotion || assetFailed) {
-        const poster = posterBitmapRef.current;
-        if (poster && (force || lastDrawnIndexRef.current !== -2)) {
-          drawCover(ctx, poster, poster.width, poster.height, cw, ch);
-          lastDrawnIndexRef.current = -2;
-        }
+      const quantized = Math.round(smoothedProgress * 240) / 240;
+      if (!force && quantized === lastProgressRef.current) return;
+      lastProgressRef.current = quantized;
+
+      drawBreathingVessel(ctx, cw, ch, quantized);
+    };
+
+    const tick = () => {
+      rafId = 0;
+      if (reducedMotion) {
+        smoothedProgress = 0.35;
+        renderFrame(false);
         return;
       }
 
-      const frames = framesRef.current;
-      if (frames.length > 0) {
-        const idx = clamp(
-          Math.round(smoothedProgress * (frames.length - 1)),
-          0,
-          frames.length - 1,
-        );
-        if (force || idx !== lastDrawnIndexRef.current) {
-          const bmp = frames[idx];
-          if (bmp) {
-            drawCover(ctx, bmp, bmp.width, bmp.height, cw, ch);
-            lastDrawnIndexRef.current = idx;
-          }
-        }
-      } else if (fallbackVideo && fallbackVideo.readyState >= 1) {
-        const duration =
-          Number.isFinite(fallbackVideo.duration) && fallbackVideo.duration > 0
-            ? fallbackVideo.duration
-            : 0;
-        if (duration > 0) {
-          const desiredTime = clamp(smoothedProgress * (duration - 0.05), 0, duration);
-          if (Math.abs(fallbackVideo.currentTime - desiredTime) > 0.001) {
-            if (!isFallbackSeeking) {
-              isFallbackSeeking = true;
-              try {
-                fallbackVideo.currentTime = desiredTime;
-              } catch {
-                isFallbackSeeking = false;
-              }
-            } else {
-              pendingFallbackTime = desiredTime;
-            }
-          }
-        }
-      } else if (posterBitmapRef.current && force) {
-        const poster = posterBitmapRef.current;
-        drawCover(ctx, poster, poster.width, poster.height, cw, ch);
+      const delta = targetProgress - smoothedProgress;
+      if (Math.abs(delta) > 0.0002) {
+        smoothedProgress += delta * 0.1;
+        renderFrame(false);
+        // Only schedule another frame while interpolation is still settling
+        rafId = window.requestAnimationFrame(tick);
+      } else if (smoothedProgress !== targetProgress) {
+        smoothedProgress = targetProgress;
+        renderFrame(false);
+      }
+    };
+
+    const scheduleTick = () => {
+      if (!reducedMotion && rafId === 0) {
+        rafId = window.requestAnimationFrame(tick);
       }
     };
 
     const handleResize = () => {
+      maxScroll = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const nextW = Math.max(1, Math.round(canvas.clientWidth * dpr));
       const nextH = Math.max(1, Math.round(canvas.clientHeight * dpr));
@@ -308,78 +237,53 @@ export function ScrollVideo() {
         canvas.height = nextH;
       }
       targetProgress = getScrollProgress();
-      drawCurrent(true);
+      renderFrame(true);
+      scheduleTick();
     };
 
     const handleScroll = () => {
       targetProgress = getScrollProgress();
+      scheduleTick();
     };
 
     handleResize();
     window.addEventListener("resize", handleResize, { passive: true });
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    const tick = () => {
-      if (reducedMotion) {
-        smoothedProgress = 0.5;
-        drawCurrent(false);
-        return;
-      }
-      targetProgress = getScrollProgress();
-      smoothedProgress += (targetProgress - smoothedProgress) * 0.1;
-      if (Math.abs(targetProgress - smoothedProgress) < 0.0001) {
-        smoothedProgress = targetProgress;
-      }
-      drawCurrent(false);
-      rafId = window.requestAnimationFrame(tick);
-    };
-
-    if (!reducedMotion) {
-      rafId = window.requestAnimationFrame(tick);
-    } else {
-      drawCurrent(true);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => {
+        maxScroll = Math.max(
+          0,
+          document.documentElement.scrollHeight - window.innerHeight,
+        );
+        targetProgress = getScrollProgress();
+        scheduleTick();
+      });
+      ro.observe(document.documentElement);
     }
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
+      if (ro) ro.disconnect();
       if (rafId) window.cancelAnimationFrame(rafId);
-      if (fallbackVideo) {
-        fallbackVideo.removeEventListener("seeked", onFallbackSeeked);
-      }
     };
-  }, [reducedMotion, assetFailed, framesReady]);
+  }, [reducedMotion]);
 
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-ink"
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-ink"
     >
-      {(reducedMotion || assetFailed) && (
-        <img
-          src={POSTER_SRC}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-
-      {!reducedMotion && !assetFailed && !framesReady && (
-        <video
-          ref={fallbackVideoRef}
-          src={VIDEO_SRC}
-          poster={POSTER_SRC}
-          muted
-          playsInline
-          preload="auto"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 h-full w-full"
+      <img
+        src={POSTER_SRC}
+        alt=""
+        loading="eager"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover opacity-40"
       />
-
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       {/* 20% black readability overlay */}
       <div className="absolute inset-0 bg-ink/20" />
     </div>

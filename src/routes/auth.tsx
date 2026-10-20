@@ -34,7 +34,14 @@ function AuthPage() {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/admin", replace: true });
     });
-    supabase.rpc("admin_exists").then(({ data }) => setHasAdmin(Boolean(data)));
+    supabase.rpc("admin_exists").then(({ data, error }) => {
+      if (error) {
+        // If RPC fails, default to sign-in view rather than falsely assuming no admin exists
+        setHasAdmin(true);
+        return;
+      }
+      setHasAdmin(Boolean(data));
+    });
   }, [navigate]);
 
   const isSetup = hasAdmin === false;
@@ -62,12 +69,12 @@ function AuthPage() {
   }
 
   return (
-    <main className="flex min-h-[70dvh] items-center justify-center px-4 py-16">
+    <main className="flex min-h-[75dvh] items-center justify-center px-4 pb-16 pt-28">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-2xl border border-line bg-panel p-6 shadow-panel"
+        className="w-full max-w-sm rounded-2xl border border-line bg-panel/95 p-6 shadow-panel backdrop-blur-md"
       >
-        <span className="label-mono inline-flex items-center gap-2 text-gold">
+        <span className="label-mono inline-flex items-center gap-2 text-halo">
           <Lock className="size-3" aria-hidden /> zona privada
         </span>
         <h1 className="mt-2 font-mono text-xl font-semibold text-foreground">
@@ -102,11 +109,11 @@ function AuthPage() {
             className={`mt-1 ${inputCls}`}
           />
         </label>
-        {message && <p className="mt-4 text-sm text-gold">{message}</p>}
+        {message && <p className="mt-4 font-mono text-xs text-gold">{message}</p>}
         <button
           type="submit"
           disabled={busy || hasAdmin === null}
-          className="mt-6 w-full rounded-lg border border-halo/40 bg-halo/10 px-4 py-2.5 font-mono text-sm text-halo transition-colors hover:bg-halo/20 disabled:opacity-50"
+          className="mt-6 w-full cursor-pointer rounded-lg border border-halo/40 bg-halo/10 px-4 py-2.5 font-mono text-sm text-halo transition-colors hover:bg-halo/20 disabled:opacity-50"
         >
           {busy ? "..." : isSetup ? "crear cuenta" : "entrar"}
         </button>

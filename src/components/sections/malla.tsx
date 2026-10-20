@@ -1,26 +1,20 @@
 import { Link } from "@tanstack/react-router";
+import { useMemo } from "react";
 
 import { Reveal } from "@/components/common/reveal";
-import type { Accent, Subject } from "@/data/catalog";
-
-function accentClasses(accent: Accent): string {
-  if (accent === "gold") {
-    return "border-gold/30 hover:border-gold/70 hover:shadow-gold";
-  }
-  if (accent === "halo") {
-    return "border-halo/30 hover:border-halo/70 hover:shadow-halo";
-  }
-  return "border-line hover:border-foreground/50 hover:shadow-raised";
-}
-
-function accentBadgeClasses(accent: Accent): string {
-  if (accent === "gold") return "text-gold";
-  if (accent === "halo") return "text-halo";
-  return "text-muted-foreground";
-}
+import type { Subject } from "@/data/catalog";
 
 export function Malla({ subjects }: { subjects: Subject[] }) {
-  const levels = [...new Set(subjects.map((s) => s.level))].sort((a, b) => a - b);
+  const { levels, byLevel } = useMemo(() => {
+    const grouped = new Map<number, Subject[]>();
+    for (const s of subjects) {
+      const list = grouped.get(s.level);
+      if (list) list.push(s);
+      else grouped.set(s.level, [s]);
+    }
+    const sortedLevels = [...grouped.keys()].sort((a, b) => a - b);
+    return { levels: sortedLevels, byLevel: grouped };
+  }, [subjects]);
 
   return (
     <section
@@ -32,7 +26,7 @@ export function Malla({ subjects }: { subjects: Subject[] }) {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Reveal delay={100}>
-              <p className="label-mono text-gold/80">// malla curricular</p>
+              <p className="label-mono text-halo">// malla curricular</p>
             </Reveal>
             <Reveal delay={200}>
               <h2
@@ -82,25 +76,21 @@ export function Malla({ subjects }: { subjects: Subject[] }) {
                     <h3 className="label-mono border-b border-line pb-2 text-center text-foreground/70">
                       nivel {lvl}
                     </h3>
-                    {subjects
-                      .filter((s) => s.level === lvl)
-                      .map((s) => (
-                        <Link
-                          key={s.id}
-                          to="/ramo/$id"
-                          params={{ id: s.id }}
-                          className={`group flex min-h-24 flex-col rounded-lg border bg-ink/85 text-center backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground ${accentClasses(s.accent)}`}
-                        >
-                          <span
-                            className={`border-b border-line py-1.5 font-mono text-xs transition-colors ${accentBadgeClasses(s.accent)}`}
-                          >
-                            {s.code}
-                          </span>
-                          <span className="flex flex-1 items-center justify-center px-2.5 py-2.5 text-xs font-medium uppercase leading-snug text-foreground/90 transition-colors group-hover:text-foreground">
-                            {s.title}
-                          </span>
-                        </Link>
-                      ))}
+                    {(byLevel.get(lvl) ?? []).map((s) => (
+                      <Link
+                        key={s.id}
+                        to="/ramo/$id"
+                        params={{ id: s.id }}
+                        className="group flex min-h-24 flex-col rounded-lg border border-halo/35 bg-ink/85 text-center backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-halo/80 hover:shadow-halo focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+                      >
+                        <span className="border-b border-halo/20 py-1.5 font-mono text-xs text-halo transition-colors group-hover:text-halo">
+                          {s.code}
+                        </span>
+                        <span className="flex flex-1 items-center justify-center px-2.5 py-2.5 text-xs font-medium uppercase leading-snug text-foreground/90 transition-colors group-hover:text-foreground">
+                          {s.title}
+                        </span>
+                      </Link>
+                    ))}
                   </div>
                 ))}
               </div>

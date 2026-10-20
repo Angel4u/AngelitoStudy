@@ -23,6 +23,28 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
     }
 
     headers.set('apikey', supabaseKey);
+
+    if (typeof window !== 'undefined') {
+      const rawUrl =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      try {
+        const parsed = new URL(rawUrl);
+        const proxiedUrl = `${window.location.origin}/api/supabase-proxy${parsed.pathname}${parsed.search}`;
+        return fetch(proxiedUrl, {
+          ...init,
+          method: init?.method ?? (input instanceof Request ? input.method : 'GET'),
+          body: init?.body ?? (input instanceof Request ? input.body : undefined),
+          headers,
+        });
+      } catch {
+        // Fallback to direct fetch if URL parsing fails
+      }
+    }
+
     return fetch(input, { ...init, headers });
   };
 }

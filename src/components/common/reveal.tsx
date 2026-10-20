@@ -8,6 +8,27 @@ interface RevealProps {
   as?: "div" | "span";
 }
 
+type ObserverCallback = (isIntersecting: boolean) => void;
+
+let sharedObserver: IntersectionObserver | null = null;
+const observedElements = new Map<Element, ObserverCallback>();
+
+function getSharedObserver(): IntersectionObserver | null {
+  if (typeof IntersectionObserver === "undefined") return null;
+  if (!sharedObserver) {
+    sharedObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const cb = observedElements.get(entry.target);
+          if (cb) cb(entry.isIntersecting);
+        }
+      },
+      { threshold: 0.15 },
+    );
+  }
+  return sharedObserver;
+}
+
 export function Reveal({
   children,
   delay = 0,
@@ -36,22 +57,18 @@ export function Reveal({
       return;
     }
     const el = ref.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
+    const observer = getSharedObserver();
+    if (!el || !observer) {
       setVisible(true);
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          setVisible(entry.isIntersecting);
-        }
-      },
-      { threshold: 0.15 },
-    );
-
+    observedElements.set(el, setVisible);
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observedElements.delete(el);
+      observer.unobserve(el);
+    };
   }, [reducedMotion]);
 
   return (
@@ -68,8 +85,8 @@ export function Reveal({
         reducedMotion
           ? "translate-y-0 opacity-100"
           : cn(
-              "transition-all duration-700 ease-out will-change-transform",
-              visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+              "transition-all duration-700 ease-out",
+              visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 will-change-transform",
             ),
         className,
       )}

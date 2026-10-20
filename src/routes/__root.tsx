@@ -148,11 +148,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <div className="relative min-h-dvh">
+      <div className="relative isolate min-h-dvh">
         <ScrollVideo />
         <SiteHeader />
-        <Outlet />
-        <SiteFooter />
+        <div className="relative z-10">
+          <Outlet />
+          <SiteFooter />
+        </div>
       </div>
     </QueryClientProvider>
   );
