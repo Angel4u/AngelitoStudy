@@ -22,36 +22,60 @@ export function SiteHeader({ className }: { className?: string }) {
 
   return (
     <header className={cn("pointer-events-none", className)}>
-      {/* Top-left fixed brand block */}
-      <div className="pointer-events-auto fixed left-5 top-5 z-50 sm:left-8 sm:top-7 md:left-12">
+      {/* Mobile compact frosted header bar (< sm) so text never collides while scrolling */}
+      <div className="pointer-events-auto fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-line bg-ink/85 px-4 py-3 backdrop-blur-md sm:hidden">
+        <a
+          href="/#top"
+          aria-label="AngelitoStudy, ir al inicio"
+          className="font-mono text-sm font-semibold tracking-tight text-foreground"
+        >
+          (ANGELITO<span className="text-halo">_STUDY</span>)
+        </a>
+        <nav aria-label="Secciones principales móvil">
+          <ul className="flex items-center gap-3">
+            {navItems.map((item) => (
+              <li key={item.href}>
+                <a
+                  href={item.href}
+                  className="font-mono text-[11px] uppercase tracking-wider text-foreground/80 transition-colors hover:text-halo"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      {/* Desktop & tablet editorial corner navigation (sm+) */}
+      <div className="pointer-events-auto fixed left-8 top-7 z-50 hidden sm:block md:left-12">
         <Reveal>
           <a
             href="/#top"
             aria-label="AngelitoStudy, ir al inicio"
-            className="inline-block rounded-sm font-mono text-lg font-medium tracking-tight text-foreground text-cinematic-shadow transition-colors hover:text-halo focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground sm:text-xl md:text-2xl"
+            className="inline-block rounded-sm font-mono text-xl font-medium tracking-tight text-foreground text-cinematic-shadow transition-colors hover:text-halo focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground md:text-2xl"
           >
             (ANGELITO_STUDY)
           </a>
         </Reveal>
         <Reveal delay={150}>
-          <p className="mt-6 font-mono text-[10px] text-foreground/60 text-cinematic-shadow sm:mt-8 sm:text-xs">
+          <p className="mt-6 font-mono text-xs text-foreground/60 text-cinematic-shadow">
             [ v.01s{schedule} ]
           </p>
         </Reveal>
       </div>
 
-      {/* Top-right fixed vertical navigation */}
       <nav
         aria-label="Secciones principales"
-        className="pointer-events-auto fixed right-5 top-5 z-50 sm:right-8 sm:top-7 md:right-12"
+        className="pointer-events-auto fixed right-8 top-7 z-50 hidden sm:block md:right-12"
       >
-        <ul className="flex flex-col items-end gap-1.5 sm:gap-2">
+        <ul className="flex flex-col items-end gap-2">
           {navItems.map((item, i) => (
             <li key={item.href}>
               <Reveal delay={100 + i * 120}>
                 <a
                   href={item.href}
-                  className="group inline-flex items-center gap-1 rounded-sm py-0.5 font-mono text-xs text-foreground/80 text-cinematic-shadow transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground sm:text-sm"
+                  className="group inline-flex items-center gap-1 rounded-sm py-0.5 font-mono text-sm text-foreground/80 text-cinematic-shadow transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground"
                 >
                   <span>{item.label}</span>
                   <ArrowUpRight

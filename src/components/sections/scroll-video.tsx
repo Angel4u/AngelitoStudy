@@ -16,9 +16,9 @@ function drawBreathingVessel(
   ctx.fillRect(0, 0, w, h);
 
   const cx = w * 0.5;
-  const cy = h * 0.5;
+  const cy = h < w ? h * 0.5 : h * 0.38;
   const minDim = Math.min(w, h);
-  const baseR = minDim * 0.34;
+  const baseR = h > w ? minDim * 0.44 : minDim * 0.34;
 
   const phase = progress * Math.PI * 2;
   const breath = Math.sin(phase);

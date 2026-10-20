@@ -1,7 +1,10 @@
-import { ArrowDown, Check, Share2 } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Check, FolderOpen, Share2 } from "lucide-react";
 import { useState } from "react";
 
 import { Reveal } from "@/components/common/reveal";
+
+const PROFESSORS_DRIVE_URL =
+  "https://drive.google.com/drive/folders/105LusvpAwcjucIFQe4o5p7BGFEdgJLOd?usp=sharing";
 
 function ShareButton({ className }: { className?: string }) {
   const [copied, setCopied] = useState(false);
@@ -38,7 +41,7 @@ function ShareButton({ className }: { className?: string }) {
         type="button"
         onClick={handleShare}
         aria-label="Compartir AngelitoStudy"
-        className="inline-flex size-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+        className="inline-flex size-9 items-center justify-center rounded-full border border-line bg-ink/60 text-foreground/80 backdrop-blur-sm transition-colors hover:border-halo/50 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground sm:border-none sm:bg-transparent"
       >
         {copied ? (
           <Check size={18} aria-hidden="true" className="text-halo" />
@@ -77,11 +80,11 @@ export function Hero() {
     <section
       id="top"
       aria-label="Presentación principal"
-      className="relative flex min-h-screen flex-col justify-end pt-28 supports-[height:100svh]:min-h-[100svh]"
+      className="relative flex min-h-screen flex-col justify-end pt-20 supports-[height:100svh]:min-h-[100svh] sm:pt-28"
     >
-      <div className="relative flex flex-col gap-10 px-5 pb-16 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:px-8 md:px-12 md:pb-20">
-        <h1 className="max-w-xl text-4xl font-medium uppercase leading-[1.05] tracking-tight text-foreground text-cinematic-shadow sm:text-5xl md:text-6xl lg:text-7xl">
-          <Reveal as="span" delay={100} className="block pl-6 sm:pl-12">
+      <div className="relative flex flex-col gap-7 px-5 pb-20 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:px-8 sm:pb-16 md:px-12 md:pb-20">
+        <h1 className="max-w-xl text-[2.25rem] font-medium uppercase leading-[1.06] tracking-tight text-foreground text-cinematic-shadow sm:text-5xl md:text-6xl lg:text-7xl">
+          <Reveal as="span" delay={100} className="block sm:pl-12">
             Sobrevivir
           </Reveal>
           <Reveal as="span" delay={220} className="block">
@@ -90,20 +93,20 @@ export function Hero() {
               carrera
             </span>
           </Reveal>
-          <Reveal as="span" delay={340} className="block pl-10 sm:pl-20">
+          <Reveal as="span" delay={340} className="block pl-4 sm:pl-20">
             // Paso a
           </Reveal>
-          <Reveal as="span" delay={460} className="block pl-16 sm:pl-32">
+          <Reveal as="span" delay={460} className="block pl-8 sm:pl-32">
             Paso
           </Reveal>
         </h1>
 
-        <div className="flex w-full max-w-xs flex-col items-start">
+        <div className="flex w-full max-w-sm flex-col items-start rounded-2xl border border-line bg-ink/65 p-4 backdrop-blur-md sm:max-w-xs sm:rounded-none sm:border-none sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
           <Reveal
             delay={400}
-            className="mb-6 flex w-full items-center justify-between font-mono sm:mb-8"
+            className="mb-3 flex w-full items-center justify-between font-mono sm:mb-8"
           >
-            <span className="text-lg text-foreground/70 text-cinematic-shadow">
+            <span className="text-sm text-halo sm:text-lg sm:text-foreground/70 text-cinematic-shadow">
               ( A )
             </span>
             <span className="text-xs text-foreground/70 text-cinematic-shadow">
@@ -111,7 +114,7 @@ export function Hero() {
             </span>
           </Reveal>
 
-          <Reveal delay={520} className="mb-6 sm:mb-8">
+          <Reveal delay={520} className="mb-5 sm:mb-8">
             <p className="text-sm leading-relaxed text-foreground/85 text-cinematic-shadow">
               AngelitoStudy transforma un semestre pesado en el siguiente
               ejercicio resuelto. Revisa tu ramo, entiende la pizarra y quédate
@@ -132,13 +135,13 @@ export function Hero() {
       </div>
 
       {/* Bottom-left Share2 control */}
-      <ShareButton className="absolute bottom-5 left-5 z-20 flex items-center sm:bottom-6 sm:left-8 md:left-12" />
+      <ShareButton className="absolute bottom-4 left-5 z-20 flex items-center sm:bottom-6 sm:left-8 md:left-12" />
 
       {/* Bottom-center scroll cue */}
       <a
         href="#metodo"
         aria-label="Desplazar hacia la siguiente sección"
-        className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full p-1 text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground sm:bottom-6"
+        className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full p-1.5 text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground sm:bottom-6"
       >
         <ArrowDown
           size={18}
@@ -166,11 +169,11 @@ export function StatementSection() {
     <section
       id="metodo"
       aria-label="Método de estudio"
-      className="relative flex min-h-screen flex-col supports-[height:100svh]:min-h-[100svh]"
+      className="relative flex min-h-screen flex-col justify-between py-20 supports-[height:100svh]:min-h-[100svh] sm:py-0"
     >
       {/* Middle row */}
-      <div className="relative flex flex-1 flex-col justify-center gap-10 px-5 pt-24 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:px-8 sm:pt-0 md:px-12">
-        <h2 className="max-w-sm text-4xl font-medium uppercase leading-[1.05] tracking-tight text-foreground text-cinematic-shadow sm:text-5xl md:text-6xl">
+      <div className="relative flex flex-1 flex-col justify-center gap-6 px-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:px-8 md:px-12">
+        <h2 className="max-w-sm text-[2.25rem] font-medium uppercase leading-[1.06] tracking-tight text-foreground text-cinematic-shadow sm:text-5xl md:text-6xl">
           <Reveal as="span" delay={100} className="block">
             Entiende{" "}
             <span className="font-light italic lowercase text-gold text-gold-glow">
@@ -186,19 +189,38 @@ export function StatementSection() {
           delay={340}
           className="flex w-full items-center justify-between font-mono text-foreground/70 text-cinematic-shadow sm:w-auto sm:justify-start sm:gap-16 md:gap-24"
         >
-          <span className="text-lg">( B )</span>
+          <span className="text-sm text-gold sm:text-lg sm:text-foreground/70">
+            ( B )
+          </span>
           <span className="text-xs">[ 002 /003 ]</span>
         </Reveal>
       </div>
 
       {/* Bottom block */}
-      <div className="relative flex flex-col gap-10 px-5 pb-16 sm:px-8 md:px-12 md:pb-20">
+      <div className="relative flex flex-col gap-5 px-5 pb-14 sm:gap-8 sm:px-8 sm:pb-16 md:px-12 md:pb-20">
         <Reveal delay={460}>
-          <p className="max-w-xs text-sm leading-relaxed text-foreground/85 text-cinematic-shadow">
-            Cada ramo en AngelitoStudy está ordenado al grano: una clase en
-            video, un apunte en PDF, una guía resuelta. Quédate con la señal;
-            suelta el ruido.
-          </p>
+          <div className="max-w-md space-y-4 rounded-2xl border border-line bg-ink/70 p-4 backdrop-blur-md sm:max-w-sm sm:rounded-none sm:border-none sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+            <p className="text-sm leading-relaxed text-foreground/85 text-cinematic-shadow">
+              Abajo en la malla están mis videos y mis guías resueltas paso a
+              paso. Y si buscas el material directo de los profesores (clases
+              subidas, diapositivas y guías de ejercicios), entra al repositorio
+              general en Drive:
+            </p>
+            <a
+              href={PROFESSORS_DRIVE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-halo/80 bg-halo/15 px-5 py-3 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-halo shadow-halo backdrop-blur-md transition-all duration-200 hover:bg-halo hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground sm:w-auto sm:px-6 sm:py-3.5 sm:text-xs"
+            >
+              <FolderOpen size={16} aria-hidden="true" className="shrink-0" />
+              <span className="truncate">Drive: Clases y Guías de Profes</span>
+              <ArrowUpRight
+                size={15}
+                aria-hidden="true"
+                className="shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              />
+            </a>
+          </div>
         </Reveal>
 
         <Reveal
@@ -216,7 +238,7 @@ export function StatementSection() {
 
         <Reveal
           delay={700}
-          className="absolute bottom-5 left-5 z-20 flex items-center sm:bottom-6 sm:left-8 md:left-12"
+          className="hidden sm:absolute sm:bottom-6 sm:left-8 sm:z-20 sm:flex sm:items-center md:left-12"
         >
           <ShareButton className="flex items-center" />
         </Reveal>

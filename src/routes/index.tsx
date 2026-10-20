@@ -39,7 +39,7 @@ function Index() {
   return (
     <main className="relative min-h-dvh">
       <Hero />
-      <div aria-hidden="true" className="h-[80vh]" />
+      <div aria-hidden="true" className="h-24 sm:h-[55vh] md:h-[75vh]" />
       <StatementSection />
       <Malla subjects={data.subjects} />
     </main>
