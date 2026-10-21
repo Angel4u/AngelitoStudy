@@ -69,7 +69,7 @@ function AuthPage() {
   }
 
   return (
-    <main className="flex min-h-[75dvh] items-center justify-center px-4 pb-16 pt-28">
+    <main className="p-screen flex items-center justify-center">
       <form
         onSubmit={onSubmit}
         className="w-full max-w-sm rounded-2xl border border-line bg-panel/95 p-6 shadow-panel backdrop-blur-md"

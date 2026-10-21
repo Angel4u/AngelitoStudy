@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
   useRouter,
   HeadContent,
@@ -11,32 +10,32 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { ScrollVideo } from "@/components/sections/scroll-video";
+import { PersonaShell, usePersona } from "@/components/persona/persona-shell";
+import { Ransom } from "@/components/persona/ransom";
 
 function NotFoundComponent() {
+  const { goToScreen } = usePersona();
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="font-mono text-7xl font-bold text-halo text-halo-glow">
-          404
-        </h1>
-        <h2 className="mt-4 font-mono text-xl font-semibold text-foreground">
-          <span className="text-muted-foreground">$ </span>
-          ramo no encontrado
+    <div className="p-screen flex items-center justify-center">
+      <div className="paper max-w-md text-center">
+        <div className="mb-3">
+          <Ransom text="404" className="text-5xl" />
+        </div>
+        <h2 className="font-mono text-lg font-bold text-ink">
+          $ ramo o ruta no encontrada
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        <p className="mt-2 text-base">
           Esa ruta no existe en el repositorio. Puede que el apunte se haya
           movido o que nunca se subió.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md border border-halo/40 bg-halo/10 px-4 py-2 font-mono text-sm text-halo transition-colors hover:bg-halo/20"
+        <div className="mt-5">
+          <button
+            type="button"
+            onClick={() => goToScreen("home")}
+            className="cv-btn"
           >
-            volver al inicio
-          </Link>
+            <span>◀ Volver al Menú</span>
+          </button>
         </div>
       </div>
     </div>
@@ -51,29 +50,27 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="font-mono text-xl font-semibold tracking-tight text-foreground">
+    <div className="p-screen flex items-center justify-center">
+      <div className="paper max-w-md text-center">
+        <h1 className="font-mono text-xl font-bold text-ink">
           Esto no debería pasar
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        <p className="mt-2 text-base">
           Algo falló de nuestro lado. Puedes reintentar o volver al inicio.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
           <button
+            type="button"
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md border border-halo/40 bg-halo/10 px-4 py-2 font-mono text-sm text-halo transition-colors hover:bg-halo/20"
+            className="cv-btn"
           >
-            reintentar
+            <span>Reintentar</span>
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-panel px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-panel-2"
-          >
-            ir al inicio
+          <a href="/" className="back-hint">
+            Ir al inicio
           </a>
         </div>
       </div>
@@ -93,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Videos de resolución de ejercicios y apuntes universitarios para estudiantes de Ingeniería Civil Informática.",
       },
       { name: "author", content: "AngelitoStudy" },
-      { name: "theme-color", content: "#0a0a0a" },
+      { name: "theme-color", content: "#0b0b0d" },
       { property: "og:title", content: "AngelitoStudy" },
       {
         property: "og:description",
@@ -116,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap",
       },
       { rel: "icon", type: "image/svg+xml", href: "/assets/solace-mark.svg" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
@@ -147,15 +144,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <div className="relative isolate min-h-dvh">
-        <ScrollVideo />
-        <SiteHeader />
-        <div className="relative z-10">
-          <Outlet />
-          <SiteFooter />
-        </div>
-      </div>
+      <PersonaShell>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </PersonaShell>
     </QueryClientProvider>
   );
 }

@@ -118,7 +118,8 @@ function AdminPage() {
   const d = admin.data;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-5 pb-16 pt-28 sm:px-8">
+    <main className="p-screen">
+      <div className="mx-auto w-full max-w-5xl rounded-2xl border border-line bg-ink/90 p-5 shadow-raised backdrop-blur-md sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <span className="label-mono text-gold">// panel admin</span>
@@ -160,6 +161,7 @@ function AdminPage() {
             {d.socials.map((r) => <SocialForm key={r.id} row={r} done={done} />)}
           </>
         )}
+      </div>
       </div>
     </main>
   );
