@@ -180,92 +180,96 @@ function Index() {
           id="screen-malla"
           aria-label="Malla Curricular"
         >
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="screen-head">
-              <Ransom text="MALLA" />
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="screen-head !mb-0 !text-2xl sm:!text-3xl">
+                <Ransom text="MALLA" />
+              </div>
+              <button
+                type="button"
+                className="back-hint !mb-0"
+                onClick={() => goToScreen("home")}
+              >
+                ← Volver al Inicio
+              </button>
+              <button
+                type="button"
+                className="back-hint !mb-0 !bg-halo !text-foreground"
+                onClick={() => goToScreen("drive")}
+              >
+                📂 Drive de Profes
+              </button>
             </div>
-            <button
-              type="button"
-              className="back-hint"
-              onClick={() => goToScreen("home")}
-            >
-              ESC · Volver
-            </button>
-            <button
-              type="button"
-              className="back-hint !bg-halo !text-foreground"
-              onClick={() => goToScreen("drive")}
-            >
-              📂 Ver Drive de Profes
-            </button>
-          </div>
 
-          {/* Level selector bar */}
-          <div
-            role="tablist"
-            aria-label="Filtrar por semestre"
-            className="mt-2 mb-5 flex items-center gap-2 overflow-x-auto pb-2"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={selectedLevel === "all"}
-              onClick={() => {
-                playSelect();
-                setSelectedLevel("all");
-              }}
-              className={`shrink-0 cursor-pointer px-3.5 py-1.5 font-mono text-xs font-bold uppercase tracking-wider transition-transform ${
-                selectedLevel === "all"
-                  ? "bg-foreground text-ink -rotate-1 shadow-halo"
-                  : "bg-ink/90 text-foreground border border-halo/50 hover:border-foreground"
-              }`}
+            {/* Compact level filter pills */}
+            <div
+              role="tablist"
+              aria-label="Filtrar por semestre"
+              className="flex items-center gap-1.5 overflow-x-auto py-1"
             >
-              Todos los niveles
-            </button>
-            {levels.map((lvl) => {
-              const active = selectedLevel === lvl;
-              return (
-                <button
-                  key={lvl}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => {
-                    playSelect();
-                    setSelectedLevel(lvl);
-                  }}
-                  className={`shrink-0 cursor-pointer px-3.5 py-1.5 font-mono text-xs font-bold uppercase tracking-wider transition-transform ${
-                    active
-                      ? "bg-foreground text-ink -rotate-1 shadow-halo"
-                      : "bg-ink/90 text-foreground border border-halo/50 hover:border-foreground"
-                  }`}
-                >
-                  Nivel {lvl}
-                </button>
-              );
-            })}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedLevel === "all"}
+                onClick={() => {
+                  playSelect();
+                  setSelectedLevel("all");
+                }}
+                className={`shrink-0 cursor-pointer px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider transition-transform ${
+                  selectedLevel === "all"
+                    ? "bg-foreground text-ink -rotate-1 shadow-halo"
+                    : "bg-ink/90 text-foreground border border-halo/60 hover:border-foreground"
+                }`}
+              >
+                Vista Completa
+              </button>
+              {levels.map((lvl) => {
+                const active = selectedLevel === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => {
+                      playSelect();
+                      setSelectedLevel(lvl);
+                    }}
+                    className={`shrink-0 cursor-pointer px-2 py-1 text-[11px] font-extrabold uppercase tracking-wider transition-transform ${
+                      active
+                        ? "bg-foreground text-ink -rotate-1 shadow-halo"
+                        : "bg-ink/90 text-foreground border border-halo/60 hover:border-foreground"
+                    }`}
+                  >
+                    N{lvl}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {levels.length === 0 ? (
-            <div className="paper">Todavía no hay ramos cargados.</div>
+            <div className="paper mt-3">Todavía no hay ramos cargados.</div>
           ) : selectedLevel === "all" ? (
-            /* Full multi-column Malla on desktop + responsive 2-col by level on mobile */
+            /* Zoomed-out Full-Fit Malla on Desktop (all levels fit on screen without scrolling) + Compact grid on Mobile */
             <>
-              <div className="space-y-6 md:hidden">
+              {/* Mobile view */}
+              <div className="mt-2 space-y-4 md:hidden">
                 {levels.map((lvl) => (
-                  <div key={lvl} className="space-y-2.5">
-                    <div className="hud-tag inline-block">NIVEL {lvl}</div>
-                    <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div key={lvl} className="space-y-1.5">
+                    <div className="hud-tag inline-block !py-0.5 !text-[10px]">
+                      NIVEL {lvl}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
                       {(byLevel.get(lvl) ?? []).map((s) => (
                         <button
                           key={s.id}
                           type="button"
-                          onMouseEnter={() => playSelect()}
                           onClick={() => openRamo(s.id)}
-                          className="p-card min-h-24 text-left"
+                          className="malla-compact-card text-left"
                         >
-                          <span className="lang">{s.code}</span>
-                          <span className="mt-3 block font-mono text-xs font-bold uppercase leading-snug text-foreground">
+                          <span className="malla-compact-code">{s.code}</span>
+                          <span className="malla-compact-title !text-left">
                             {s.title}
                           </span>
                         </button>
@@ -275,33 +279,29 @@ function Index() {
                 ))}
               </div>
 
-              <div className="hidden overflow-x-auto pb-8 md:block">
+              {/* Desktop Zoomed-Out Full Malla: fits all columns in 100% width with no scroll */}
+              <div className="mt-2 hidden md:block">
                 <div
-                  className="grid w-max gap-3.5 pt-2"
+                  className="grid w-full gap-1.5 lg:gap-2"
                   style={{
-                    gridTemplateColumns: `repeat(${levels.length}, minmax(10rem, 11.5rem))`,
+                    gridTemplateColumns: `repeat(${levels.length}, minmax(0, 1fr))`,
                   }}
                 >
                   {levels.map((lvl) => (
-                    <div key={lvl} className="flex flex-col gap-3.5">
-                      <div className="hud-tag text-center">NIVEL {lvl}</div>
-                      {(byLevel.get(lvl) ?? []).map((s, idx) => (
+                    <div key={lvl} className="flex min-w-0 flex-col gap-1.5">
+                      <div className="bg-foreground text-ink border-2 border-ink py-0.5 text-center text-[10px] font-black uppercase tracking-wider shadow-[2px_2px_0_#0d3fd8]">
+                        NIVEL {lvl}
+                      </div>
+                      {(byLevel.get(lvl) ?? []).map((s) => (
                         <button
                           key={s.id}
                           type="button"
                           onMouseEnter={() => playSelect()}
                           onClick={() => openRamo(s.id)}
-                          style={
-                            {
-                              "--tilt": `${((idx % 3) - 1) * 0.7}deg`,
-                            } as React.CSSProperties
-                          }
-                          className="p-card min-h-24 text-center"
+                          className="malla-compact-card"
                         >
-                          <span className="lang">{s.code}</span>
-                          <span className="mt-3 flex flex-1 items-center justify-center px-1 font-mono text-xs font-bold uppercase leading-snug text-foreground">
-                            {s.title}
-                          </span>
+                          <span className="malla-compact-code">{s.code}</span>
+                          <span className="malla-compact-title">{s.title}</span>
                         </button>
                       ))}
                     </div>
@@ -311,7 +311,7 @@ function Index() {
             </>
           ) : (
             /* Single selected level grid */
-            <div className="grid grid-cols-2 gap-4 pt-2 sm:grid-cols-3 md:grid-cols-4">
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
               {(byLevel.get(selectedLevel) ?? []).map((s, idx) => (
                 <button
                   key={s.id}
@@ -320,16 +320,16 @@ function Index() {
                   onClick={() => openRamo(s.id)}
                   style={
                     {
-                      "--tilt": `${((idx % 3) - 1) * 0.8}deg`,
+                      "--tilt": `${((idx % 3) - 1) * 0.6}deg`,
                     } as React.CSSProperties
                   }
-                  className="p-card min-h-28 text-left"
+                  className="p-card min-h-24 text-left"
                 >
                   <span className="lang">{s.code}</span>
-                  <span className="mt-4 block font-mono text-sm font-bold uppercase leading-snug text-foreground">
+                  <span className="mt-3 block text-xs font-extrabold uppercase leading-snug text-foreground sm:text-sm">
                     {s.title}
                   </span>
-                  <span className="mt-3 block font-mono text-[11px] uppercase tracking-wider text-halo">
+                  <span className="mt-2 block text-[10px] font-bold uppercase tracking-wider text-halo">
                     Ver unidades y videos →
                   </span>
                 </button>
@@ -355,7 +355,7 @@ function Index() {
               className="back-hint"
               onClick={() => goToScreen("home")}
             >
-              ESC · Volver
+              ← Volver al Inicio
             </button>
           </div>
 
@@ -440,7 +440,7 @@ function Index() {
               className="back-hint"
               onClick={() => goToScreen("home")}
             >
-              ESC · Volver
+              ← Volver al Inicio
             </button>
           </div>
 

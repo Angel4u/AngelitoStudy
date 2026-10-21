@@ -88,7 +88,7 @@ function RamoPage() {
             onClick={() => goToScreen("malla")}
             className="back-hint"
           >
-            ESC · Volver a la Malla
+            ← Volver a la Malla
           </button>
           <span className="hud-tag">NIVEL {s.level}</span>
         </div>

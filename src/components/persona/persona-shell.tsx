@@ -179,9 +179,14 @@ export function PersonaShell({ children }: { children: ReactNode }) {
     return () => window.clearInterval(id);
   }, []);
 
-  // Mouse parallax on background stripes & halftone
+  // Mouse parallax on background stripes & halftone (only on fine-pointer desktop)
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
     let tx = 0;
     let ty = 0;
     let cx = 0;
@@ -218,10 +223,10 @@ export function PersonaShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Custom 30-frame animated Persona sprite-strip cursor
+  // Custom 30-frame animated Persona sprite-strip cursor (only on fine-pointer desktop)
   useEffect(() => {
     if (
-      !window.matchMedia("(pointer: fine)").matches ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
       return;
@@ -247,7 +252,7 @@ export function PersonaShell({ children }: { children: ReactNode }) {
       const target = e.target as HTMLElement | null;
       const overInteractive = Boolean(
         target?.closest(
-          "a,button,input,select,textarea,.p-card,.menu-item,.back-hint,.contact-chip,#big-name",
+          "a,button,input,select,textarea,.p-card,.malla-compact-card,.hud-home-btn,.hud-nav-btn,.menu-item,.back-hint,.contact-chip,#big-name",
         ),
       );
       cur.classList.toggle("link", overInteractive);
@@ -381,28 +386,66 @@ export function PersonaShell({ children }: { children: ReactNode }) {
       {/* Main Persona HUD Shell */}
       <div id="shell">
         <header id="hud-top">
-          <button
-            type="button"
-            onClick={() => goToScreen("home")}
-            className="hud-tag cursor-pointer border-0 text-left transition-transform hover:scale-105"
-          >
-            Repositorio // ANGELITO STUDY
-          </button>
-          <div className="hud-tag alt">{scheduleText}</div>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => goToScreen("home")}
+              aria-current={isHomeRoute && screen === "home" ? "page" : undefined}
+              className="hud-home-btn"
+            >
+              <span aria-hidden="true">🏠</span>
+              <span>INICIO // ANGELITO</span>
+            </button>
+
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => goToScreen("malla")}
+                className={`hud-nav-btn ${isHomeRoute && screen === "malla" ? "active" : ""}`}
+              >
+                📚 Malla
+              </button>
+              <button
+                type="button"
+                onClick={() => goToScreen("drive")}
+                className={`hud-nav-btn ${isHomeRoute && screen === "drive" ? "active" : ""}`}
+              >
+                📂 Drive
+              </button>
+              <button
+                type="button"
+                onClick={() => goToScreen("redes")}
+                className={`hud-nav-btn ${isHomeRoute && screen === "redes" ? "active" : ""}`}
+              >
+                🌐 Redes
+              </button>
+            </div>
+          </div>
+
+          <div className="hud-tag alt hidden lg:block">{scheduleText}</div>
         </header>
 
         <div id="stage">{children}</div>
 
         <footer id="hud-bottom">
-          <span className="hidden sm:inline">
+          <span className="desktop-kb-hint">
             <span className="key">↑↓</span>Seleccionar
           </span>
-          <span className="hidden sm:inline">
+          <span className="desktop-kb-hint">
             <span className="key">Enter</span>Confirmar
           </span>
-          <span>
+          <span className="desktop-kb-hint">
             <span className="key">Esc</span>Volver
           </span>
+          {(!isHomeRoute || screen !== "home") && (
+            <button
+              type="button"
+              onClick={() => goToScreen("home")}
+              className="cursor-pointer border-2 border-foreground bg-halo px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wider text-foreground sm:hidden"
+            >
+              ← Volver al Menú
+            </button>
+          )}
           <span className="ml-auto font-bold opacity-95" id="clock">
             {clock}
           </span>
