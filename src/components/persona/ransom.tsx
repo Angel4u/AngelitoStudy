@@ -28,25 +28,39 @@ export function Ransom({ text, className }: RansomProps) {
         };
       }
       const h = hashString(upper + i);
-      const rot = (h % 17) - 8; // -8..8 deg
-      const scale = 0.88 + ((h >> 3) % 26) / 100; // 0.88..1.13
-      const dy = ((h >> 5) % 9) - 4; // -4..4 px
-      const transform = `rotate(${rot}deg) scale(${scale}) translateY(${dy}px)`;
+      const rot = (h % 13) - 6; // -6..6 deg
+      const rawScale = 0.9 + ((h >> 3) % 16) / 100; // 0.90..1.05
+      const dy = ((h >> 5) % 7) - 3; // -3..3 px
       const variant = (h >> 7) % 10;
 
       let variantClass = "";
+      // Narrow letters like I or L should never get a solid box background
+      // because a rectangle around "I" looks oversized and blocks the letter shape.
+      const isNarrow = c === "I" || c === "L" || c === "1";
+
       if (
         (upper === "ANGELITO" && (c === "G" || c === "T")) ||
         (upper === "STUDY" && c === "D")
       ) {
         variantClass = "box";
-      } else if (variant === 0) {
+      } else if (upper === "DRIVE" && c === "I") {
+        variantClass = "red";
+      } else if (!isNarrow && variant === 0) {
         variantClass = "box";
-      } else if (variant === 1) {
+      } else if (!isNarrow && variant === 1) {
         variantClass = "boxw";
       } else if (variant === 2) {
         variantClass = "red";
       }
+
+      const finalScale =
+        variantClass === "box" || variantClass === "boxw"
+          ? Math.min(rawScale, 0.94)
+          : isNarrow
+            ? Math.min(rawScale, 0.96)
+            : rawScale;
+
+      const transform = `rotate(${rot}deg) scale(${finalScale}) translateY(${dy}px)`;
 
       return {
         key: `${i}-${c}`,

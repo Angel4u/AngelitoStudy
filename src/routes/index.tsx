@@ -180,96 +180,92 @@ function Index() {
           id="screen-malla"
           aria-label="Malla Curricular"
         >
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <div className="screen-head !mb-0 !text-2xl sm:!text-3xl">
-                <Ransom text="MALLA" />
-              </div>
-              <button
-                type="button"
-                className="back-hint !mb-0"
-                onClick={() => goToScreen("home")}
-              >
-                ← Volver al Inicio
-              </button>
-              <button
-                type="button"
-                className="back-hint !mb-0 !bg-halo !text-foreground"
-                onClick={() => goToScreen("drive")}
-              >
-                📂 Drive de Profes
-              </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="screen-head !mb-1">
+              <Ransom text="MALLA" />
             </div>
-
-            {/* Compact level filter pills */}
-            <div
-              role="tablist"
-              aria-label="Filtrar por semestre"
-              className="flex items-center gap-1.5 overflow-x-auto py-1"
+            <button
+              type="button"
+              className="back-hint"
+              onClick={() => goToScreen("home")}
             >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedLevel === "all"}
-                onClick={() => {
-                  playSelect();
-                  setSelectedLevel("all");
-                }}
-                className={`shrink-0 cursor-pointer px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider transition-transform ${
-                  selectedLevel === "all"
-                    ? "bg-foreground text-ink -rotate-1 shadow-halo"
-                    : "bg-ink/90 text-foreground border border-halo/60 hover:border-foreground"
-                }`}
-              >
-                Vista Completa
-              </button>
-              {levels.map((lvl) => {
-                const active = selectedLevel === lvl;
-                return (
-                  <button
-                    key={lvl}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => {
-                      playSelect();
-                      setSelectedLevel(lvl);
-                    }}
-                    className={`shrink-0 cursor-pointer px-2 py-1 text-[11px] font-extrabold uppercase tracking-wider transition-transform ${
-                      active
-                        ? "bg-foreground text-ink -rotate-1 shadow-halo"
-                        : "bg-ink/90 text-foreground border border-halo/60 hover:border-foreground"
-                    }`}
-                  >
-                    N{lvl}
-                  </button>
-                );
-              })}
-            </div>
+              ← Volver al Inicio
+            </button>
+            <button
+              type="button"
+              className="back-hint !bg-halo !text-foreground"
+              onClick={() => goToScreen("drive")}
+            >
+              📂 Ver Drive de Profes
+            </button>
+          </div>
+
+          {/* Level selector bar */}
+          <div
+            role="tablist"
+            aria-label="Filtrar por semestre"
+            className="mt-1 mb-2 flex items-center gap-1.5 overflow-x-auto pb-1"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={selectedLevel === "all"}
+              onClick={() => {
+                playSelect();
+                setSelectedLevel("all");
+              }}
+              className={`shrink-0 cursor-pointer px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider transition-transform ${
+                selectedLevel === "all"
+                  ? "bg-foreground text-ink -rotate-1 shadow-halo"
+                  : "bg-ink/90 text-foreground border border-halo/50 hover:border-foreground"
+              }`}
+            >
+              Todos los niveles
+            </button>
+            {levels.map((lvl) => {
+              const active = selectedLevel === lvl;
+              return (
+                <button
+                  key={lvl}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => {
+                    playSelect();
+                    setSelectedLevel(lvl);
+                  }}
+                  className={`shrink-0 cursor-pointer px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider transition-transform ${
+                    active
+                      ? "bg-foreground text-ink -rotate-1 shadow-halo"
+                      : "bg-ink/90 text-foreground border border-halo/50 hover:border-foreground"
+                  }`}
+                >
+                  Nivel {lvl}
+                </button>
+              );
+            })}
           </div>
 
           {levels.length === 0 ? (
-            <div className="paper mt-3">Todavía no hay ramos cargados.</div>
+            <div className="paper">Todavía no hay ramos cargados.</div>
           ) : selectedLevel === "all" ? (
-            /* Zoomed-out Full-Fit Malla on Desktop (all levels fit on screen without scrolling) + Compact grid on Mobile */
+            /* Full multi-column Malla on desktop (90% zoom proportions so all 6 rows fit without scroll & character stays visible on right) + responsive 2-col on mobile */
             <>
-              {/* Mobile view */}
-              <div className="mt-2 space-y-4 md:hidden">
+              <div className="space-y-5 md:hidden">
                 {levels.map((lvl) => (
-                  <div key={lvl} className="space-y-1.5">
-                    <div className="hud-tag inline-block !py-0.5 !text-[10px]">
-                      NIVEL {lvl}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
+                  <div key={lvl} className="space-y-2">
+                    <div className="hud-tag inline-block">NIVEL {lvl}</div>
+                    <div className="grid grid-cols-2 gap-2.5 pt-1">
                       {(byLevel.get(lvl) ?? []).map((s) => (
                         <button
                           key={s.id}
                           type="button"
+                          onMouseEnter={() => playSelect()}
                           onClick={() => openRamo(s.id)}
-                          className="malla-compact-card text-left"
+                          className="p-card min-h-20 text-left"
                         >
-                          <span className="malla-compact-code">{s.code}</span>
-                          <span className="malla-compact-title !text-left">
+                          <span className="lang">{s.code}</span>
+                          <span className="mt-2.5 block font-mono text-[11px] font-bold uppercase leading-snug text-foreground">
                             {s.title}
                           </span>
                         </button>
@@ -279,29 +275,35 @@ function Index() {
                 ))}
               </div>
 
-              {/* Desktop Zoomed-Out Full Malla: fits all columns in 100% width with no scroll */}
-              <div className="mt-2 hidden md:block">
+              <div className="hidden overflow-x-auto pb-1 md:block">
                 <div
-                  className="grid w-full gap-1.5 lg:gap-2"
+                  className="malla-grid-desktop grid w-max gap-2.5 pt-1"
                   style={{
-                    gridTemplateColumns: `repeat(${levels.length}, minmax(0, 1fr))`,
+                    gridTemplateColumns: `repeat(${levels.length}, minmax(8.5rem, 9.6rem))`,
                   }}
                 >
                   {levels.map((lvl) => (
-                    <div key={lvl} className="flex min-w-0 flex-col gap-1.5">
-                      <div className="bg-foreground text-ink border-2 border-ink py-0.5 text-center text-[10px] font-black uppercase tracking-wider shadow-[2px_2px_0_#0d3fd8]">
+                    <div key={lvl} className="flex flex-col gap-2.5">
+                      <div className="hud-tag !py-0.5 text-center !text-[11px]">
                         NIVEL {lvl}
                       </div>
-                      {(byLevel.get(lvl) ?? []).map((s) => (
+                      {(byLevel.get(lvl) ?? []).map((s, idx) => (
                         <button
                           key={s.id}
                           type="button"
                           onMouseEnter={() => playSelect()}
                           onClick={() => openRamo(s.id)}
-                          className="malla-compact-card"
+                          style={
+                            {
+                              "--tilt": `${((idx % 3) - 1) * 0.6}deg`,
+                            } as React.CSSProperties
+                          }
+                          className="p-card malla-p-card text-center"
                         >
-                          <span className="malla-compact-code">{s.code}</span>
-                          <span className="malla-compact-title">{s.title}</span>
+                          <span className="lang">{s.code}</span>
+                          <span className="mt-2 flex flex-1 items-center justify-center px-0.5 font-mono text-[10.5px] font-bold uppercase leading-tight text-foreground">
+                            {s.title}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -311,7 +313,7 @@ function Index() {
             </>
           ) : (
             /* Single selected level grid */
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:max-w-4xl md:grid-cols-4">
               {(byLevel.get(selectedLevel) ?? []).map((s, idx) => (
                 <button
                   key={s.id}
@@ -342,7 +344,7 @@ function Index() {
       {/* ==================== SCREEN 3: MATERIAL DRIVE (PROFES) ==================== */}
       {screen === "drive" && (
         <section
-          className="p-screen flex flex-col md:items-end"
+          className="p-screen flex flex-col items-start"
           id="screen-drive"
           aria-label="Material de Profesores en Google Drive"
         >

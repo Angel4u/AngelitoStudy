@@ -225,12 +225,12 @@
 #bg-vignette.vignette-drive {
   background:
     linear-gradient(
-      260deg,
-      rgba(0, 0, 0, 0.78) 0%,
-      rgba(0, 0, 0, 0.38) 48%,
-      transparent 70%
+      100deg,
+      rgba(0, 0, 0, 0.72) 0%,
+      rgba(0, 0, 0, 0.34) 44%,
+      transparent 66%
     ),
-    radial-gradient(ellipse at 68% 40%, transparent 25%, rgba(0, 0, 0, 0.68) 100%);
+    radial-gradient(ellipse at 30% 42%, transparent 25%, rgba(0, 0, 0, 0.58) 100%);
 }
 
 #bg-vignette.vignette-redes {
@@ -377,6 +377,7 @@
   transform: skewX(-10deg) translateY(-2px);
 }
 
+.hud-nav-btn.active,
 .hud-nav-btn.is-active {
   background: var(--red);
   color: var(--white);
@@ -663,16 +664,18 @@
 .ransom .ch.box {
   background: var(--black);
   color: var(--white);
-  padding: 0.02em 0.08em;
-  margin: 0 0.01em;
+  line-height: 0.85;
+  padding: 0.01em 0.06em;
+  margin: 0 0.02em;
   text-shadow: none;
 }
 
 .ransom .ch.boxw {
   background: var(--white);
   color: var(--black);
-  padding: 0.02em 0.08em;
-  margin: 0 0.03em;
+  line-height: 0.85;
+  padding: 0.01em 0.06em;
+  margin: 0 0.02em;
   text-shadow: none;
 }
 
@@ -852,6 +855,21 @@
   padding: 3px 10px;
   transform: rotate(2deg);
   box-shadow: 3px 3px 0 var(--black);
+}
+
+/* 90% zoomed-out Malla cards so all 6 rows fit vertically at 100% browser zoom while keeping the right-side character visible */
+.malla-p-card {
+  padding: 10px 10px 8px;
+  min-height: clamp(3.85rem, 7.5vh, 4.75rem);
+  filter: drop-shadow(4px 4px 0 var(--red-deep));
+}
+
+.malla-p-card .lang {
+  top: -8px;
+  right: 8px;
+  font-size: 9.5px;
+  padding: 2px 7px;
+  letter-spacing: 0.1em;
 }
 
 .paper {
