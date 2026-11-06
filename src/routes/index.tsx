@@ -196,16 +196,22 @@ function Index() {
               className="back-hint !bg-halo !text-foreground"
               onClick={() => goToScreen("drive")}
             >
-              📂 Ver Drive de Profes
+              Ver Drive de Profes →
             </button>
+            <span className="hidden text-xs font-bold tracking-wide text-muted-foreground lg:inline">
+              Selecciona cualquier asignatura para abrir sus videos y apuntes por unidad
+            </span>
           </div>
 
           {/* Level selector bar */}
           <div
             role="tablist"
             aria-label="Filtrar por semestre"
-            className="mt-1 mb-2 flex items-center gap-1.5 overflow-x-auto pb-1"
+            className="mt-1.5 mb-2 flex items-center gap-1.5 overflow-x-auto pb-1"
           >
+            <span className="mr-1 shrink-0 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Filtrar:
+            </span>
             <button
               type="button"
               role="tab"
@@ -214,11 +220,7 @@ function Index() {
                 playSelect();
                 setSelectedLevel("all");
               }}
-              className={`shrink-0 cursor-pointer px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider transition-transform ${
-                selectedLevel === "all"
-                  ? "bg-foreground text-ink -rotate-1 shadow-halo"
-                  : "bg-ink/90 text-foreground border border-halo/50 hover:border-foreground"
-              }`}
+              className="level-pill shrink-0"
             >
               Todos los niveles
             </button>
@@ -234,11 +236,7 @@ function Index() {
                     playSelect();
                     setSelectedLevel(lvl);
                   }}
-                  className={`shrink-0 cursor-pointer px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider transition-transform ${
-                    active
-                      ? "bg-foreground text-ink -rotate-1 shadow-halo"
-                      : "bg-ink/90 text-foreground border border-halo/50 hover:border-foreground"
-                  }`}
+                  className="level-pill shrink-0"
                 >
                   Nivel {lvl}
                 </button>
@@ -249,25 +247,30 @@ function Index() {
           {levels.length === 0 ? (
             <div className="paper">Todavía no hay ramos cargados.</div>
           ) : selectedLevel === "all" ? (
-            /* Full multi-column Malla on desktop (90% zoom proportions so all 6 rows fit without scroll & character stays visible on right) + responsive 2-col on mobile */
+            /* Standardized Malla on desktop (all 6 rows fit at 100% zoom without scroll & character stays visible on right) + responsive 2-col on mobile */
             <>
-              <div className="space-y-5 md:hidden">
+              <div className="space-y-4 md:hidden">
                 {levels.map((lvl) => (
                   <div key={lvl} className="space-y-2">
-                    <div className="hud-tag inline-block">NIVEL {lvl}</div>
-                    <div className="grid grid-cols-2 gap-2.5 pt-1">
+                    <div className="level-col-header inline-block px-3">
+                      NIVEL {lvl}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
                       {(byLevel.get(lvl) ?? []).map((s) => (
                         <button
                           key={s.id}
                           type="button"
                           onMouseEnter={() => playSelect()}
                           onClick={() => openRamo(s.id)}
-                          className="p-card min-h-20 text-left"
+                          className="malla-p-card"
                         >
-                          <span className="lang">{s.code}</span>
-                          <span className="mt-2.5 block font-mono text-[11px] font-bold uppercase leading-snug text-foreground">
-                            {s.title}
-                          </span>
+                          <div className="malla-p-card-top">
+                            <span className="malla-p-card-code">{s.code}</span>
+                            <span className="malla-p-card-arrow" aria-hidden="true">
+                              ↗
+                            </span>
+                          </div>
+                          <span className="malla-p-card-title">{s.title}</span>
                         </button>
                       ))}
                     </div>
@@ -277,33 +280,29 @@ function Index() {
 
               <div className="hidden overflow-x-auto pb-1 md:block">
                 <div
-                  className="malla-grid-desktop grid w-max gap-2.5 pt-1"
+                  className="malla-grid-desktop grid w-max gap-2 pt-0.5"
                   style={{
-                    gridTemplateColumns: `repeat(${levels.length}, minmax(8.5rem, 9.6rem))`,
+                    gridTemplateColumns: `repeat(${levels.length}, 9rem)`,
                   }}
                 >
                   {levels.map((lvl) => (
-                    <div key={lvl} className="flex flex-col gap-2.5">
-                      <div className="hud-tag !py-0.5 text-center !text-[11px]">
-                        NIVEL {lvl}
-                      </div>
-                      {(byLevel.get(lvl) ?? []).map((s, idx) => (
+                    <div key={lvl} className="flex flex-col gap-2">
+                      <div className="level-col-header">NIVEL {lvl}</div>
+                      {(byLevel.get(lvl) ?? []).map((s) => (
                         <button
                           key={s.id}
                           type="button"
                           onMouseEnter={() => playSelect()}
                           onClick={() => openRamo(s.id)}
-                          style={
-                            {
-                              "--tilt": `${((idx % 3) - 1) * 0.6}deg`,
-                            } as React.CSSProperties
-                          }
-                          className="p-card malla-p-card text-center"
+                          className="malla-p-card"
                         >
-                          <span className="lang">{s.code}</span>
-                          <span className="mt-2 flex flex-1 items-center justify-center px-0.5 font-mono text-[10.5px] font-bold uppercase leading-tight text-foreground">
-                            {s.title}
-                          </span>
+                          <div className="malla-p-card-top">
+                            <span className="malla-p-card-code">{s.code}</span>
+                            <span className="malla-p-card-arrow" aria-hidden="true">
+                              ↗
+                            </span>
+                          </div>
+                          <span className="malla-p-card-title">{s.title}</span>
                         </button>
                       ))}
                     </div>
@@ -314,25 +313,22 @@ function Index() {
           ) : (
             /* Single selected level grid */
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:max-w-4xl md:grid-cols-4">
-              {(byLevel.get(selectedLevel) ?? []).map((s, idx) => (
+              {(byLevel.get(selectedLevel) ?? []).map((s) => (
                 <button
                   key={s.id}
                   type="button"
                   onMouseEnter={() => playSelect()}
                   onClick={() => openRamo(s.id)}
-                  style={
-                    {
-                      "--tilt": `${((idx % 3) - 1) * 0.6}deg`,
-                    } as React.CSSProperties
-                  }
-                  className="p-card min-h-24 text-left"
+                  className="malla-p-card !h-24"
                 >
-                  <span className="lang">{s.code}</span>
-                  <span className="mt-3 block text-xs font-extrabold uppercase leading-snug text-foreground sm:text-sm">
+                  <div className="malla-p-card-top">
+                    <span className="malla-p-card-code">{s.code}</span>
+                    <span className="malla-p-card-arrow" aria-hidden="true">
+                      Ver unidades ↗
+                    </span>
+                  </div>
+                  <span className="malla-p-card-title !text-xs">
                     {s.title}
-                  </span>
-                  <span className="mt-2 block text-[10px] font-bold uppercase tracking-wider text-halo">
-                    Ver unidades y videos →
                   </span>
                 </button>
               ))}
@@ -362,42 +358,54 @@ function Index() {
           </div>
 
           <div className="paper mt-2">
-            <p className="font-bold text-lg">
-              En{" "}
-              <strong className="about-highlight">AngelitoStudy</strong> tienes dos
+            <p className="text-lg font-extrabold text-ink">
+              En <span className="underline decoration-halo decoration-2">AngelitoStudy</span> tienes dos
               fuentes de estudio separadas para que encuentres todo{" "}
-              <strong className="about-highlight">sin ruido</strong>:
+              <span className="underline decoration-halo decoration-2">sin ruido</span>:
             </p>
 
-            <br />
+            <div className="mt-4 space-y-3.5">
+              <p>
+                1. En la sección{" "}
+                <button
+                  type="button"
+                  onMouseEnter={() => playSelect()}
+                  onClick={() => goToScreen("malla")}
+                  className="inline-action-btn"
+                >
+                  MALLA CURRICULAR →
+                </button>{" "}
+                están mis propios{" "}
+                <strong className="font-extrabold text-ink">
+                  videos resolviendo ejercicios y mis guías explicadas paso a paso
+                </strong>{" "}
+                ordenados por ramo y unidad.
+              </p>
 
-            <p>
-              1. En la sección{" "}
-              <strong className="about-highlight">MALLA CURRICULAR</strong> están
-              mis propios{" "}
-              <strong className="about-highlight">
-                videos resolviendo ejercicios y mis guías explicadas paso a paso
-              </strong>{" "}
-              ordenados por ramo y unidad.
-            </p>
+              <p>
+                2. El acceso a{" "}
+                <a
+                  href={PROFESSORS_DRIVE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onMouseEnter={() => playSelect()}
+                  className="inline-action-btn inline-action-drive"
+                >
+                  GOOGLE DRIVE ↗
+                </a>{" "}
+                es aparte: contiene directamente{" "}
+                <strong className="font-extrabold text-ink">
+                  las clases que suben los profesores, presentaciones y guías de
+                  ejercicios oficiales
+                </strong>{" "}
+                de las asignaturas.
+              </p>
+            </div>
 
-            <br />
-
-            <p>
-              2. Este botón de{" "}
-              <strong className="about-highlight">GOOGLE DRIVE</strong> es aparte:
-              contiene directamente{" "}
-              <strong className="about-highlight">
-                las clases que suben los profesores, presentaciones y guías de
-                ejercicios oficiales
-              </strong>{" "}
-              de las asignaturas.
-            </p>
-
-            <div className="about-quote">
+            <blockquote className="about-quote">
               “Quédate con la señal; suelta el ruido. Revisa la clase del profe
               en el Drive y luego destraba los ejercicios en la Malla.”
-            </div>
+            </blockquote>
           </div>
 
           <div className="flex flex-wrap gap-4 pb-8">

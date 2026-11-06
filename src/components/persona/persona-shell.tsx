@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Volume2, VolumeX } from "lucide-react";
 import { catalogQuery } from "@/data/catalog";
 
 export type PersonaScreen = "home" | "malla" | "drive" | "redes";
@@ -380,44 +381,47 @@ export function PersonaShell({ children }: { children: ReactNode }) {
         aria-label={soundEnabled ? "Silenciar sonido de menú" : "Activar sonido de menú"}
         title={soundEnabled ? "Sonido activado" : "Sonido silenciado"}
       >
-        {soundEnabled ? "🔊" : "🔇"}
+        {soundEnabled ? (
+          <Volume2 className="mx-auto size-4" aria-hidden="true" />
+        ) : (
+          <VolumeX className="mx-auto size-4" aria-hidden="true" />
+        )}
       </button>
 
       {/* Main Persona HUD Shell */}
       <div id="shell">
         <header id="hud-top">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => goToScreen("home")}
               aria-current={isHomeRoute && screen === "home" ? "page" : undefined}
               className="hud-home-btn"
             >
-              <span aria-hidden="true">🏠</span>
               <span>INICIO // ANGELITO</span>
             </button>
 
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => goToScreen("malla")}
                 className={`hud-nav-btn ${isHomeRoute && screen === "malla" ? "active" : ""}`}
               >
-                📚 Malla
+                Malla
               </button>
               <button
                 type="button"
                 onClick={() => goToScreen("drive")}
                 className={`hud-nav-btn ${isHomeRoute && screen === "drive" ? "active" : ""}`}
               >
-                📂 Drive
+                Drive
               </button>
               <button
                 type="button"
                 onClick={() => goToScreen("redes")}
                 className={`hud-nav-btn ${isHomeRoute && screen === "redes" ? "active" : ""}`}
               >
-                🌐 Redes
+                Redes
               </button>
             </div>
           </div>
